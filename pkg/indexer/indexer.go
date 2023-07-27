@@ -1,4 +1,4 @@
-package app
+package indexer
 
 import (
 	"context"
@@ -13,19 +13,19 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 )
 
-type App interface {
+type Indexer interface {
 	IndexLatestBlock(context.Context) error
 	SchedulePeriodicIndex(time.Duration) error
 }
 
-type app struct {
+type indexer struct {
 	client *rpchttp.HTTP
 	db datastore.Datastore
 }
 
 
 
-func New(client *rpchttp.HTTP, db datastore.Datastore) App {
+func New(client *rpchttp.HTTP, db datastore.Datastore) Indexer {
 
 	// wsClient, err := jsonrpcclient.NewWS(config.RPCEndpoint, "/gateway/cos4/rpc/b3fbc22883fc3fe61254616b40fc568b")
 	// if err != nil {
@@ -43,13 +43,13 @@ func New(client *rpchttp.HTTP, db datastore.Datastore) App {
 	// 	return nil, err
 	// }
 
-	return &app{
+	return &indexer{
 		client: client,
 		db: db,
 	}
 }
 
-func (a *app) SchedulePeriodicIndex(interval time.Duration) error {
+func (a *indexer) SchedulePeriodicIndex(interval time.Duration) error {
 	blockTicker := time.NewTicker(interval)
 	ctx := context.Background()
 	for {
@@ -60,7 +60,7 @@ func (a *app) SchedulePeriodicIndex(interval time.Duration) error {
 	}
 }
 
-func (a *app) IndexLatestBlock(ctx context.Context) error {
+func (a *indexer) IndexLatestBlock(ctx context.Context) error {
 	blk, err := a.client.Block(ctx, nil)
 	if err != nil {
 		return err

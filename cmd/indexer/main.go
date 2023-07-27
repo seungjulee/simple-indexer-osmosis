@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	"github.com/seungjulee/simple-indexer-osmosis/pkg/app"
 	"github.com/seungjulee/simple-indexer-osmosis/pkg/datastore"
+	"github.com/seungjulee/simple-indexer-osmosis/pkg/indexer"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 )
 
@@ -30,7 +30,7 @@ func main() {
 		panic(err)
 	}
 
-	a := app.New(client, db)
+	a := indexer.New(client, db)
 
 	err = a.SchedulePeriodicIndex(2 * time.Second)
 	if err != nil {

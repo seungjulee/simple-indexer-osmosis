@@ -2,10 +2,12 @@ package server
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/seungjulee/simple-indexer-osmosis/pkg/datastore"
 	pb "github.com/seungjulee/simple-indexer-osmosis/rpc"
 	"github.com/twitchtv/twirp"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Server implements SimpleOsmosisExplorer rpc service
@@ -19,15 +21,33 @@ func NewExplorerServer(ds datastore.Datastore) pb.SimpleOsmosisExplorer {
 	}
 }
 
-func (s *Server) GetBlocksByValidator(ctx context.Context, req *pb.GetBlocksByValidatorRequest) (*pb.GetBlocksByValidatorResponse, error) {
+func (s *Server) GetBlocksByProposer(ctx context.Context, req *pb.GetBlocksByProposerRequest) (*pb.GetBlocksByProposerResponse, error) {
     if req.Address == "" {
         return nil, twirp.InvalidArgumentError("address", "'address' is empty")
     }
-    // return &pb.Hat{
-    //     Inches:  size.Inches,
-    //     Color: []string{"white", "black", "brown", "red", "blue"}[rand.Intn(5)],
-    //     Name:  []string{"bowler", "baseball cap", "top hat", "derby"}[rand.Intn(4)],
-    // }, nil
-	// s.datastore.GetBlockByHeight()
-	return nil, nil
+
+	blocks, err := s.Datastore.GetBlocksByProposer(req.Address)
+	if err != nil {
+		return nil, twirp.InternalError(err.Error())
+	}
+	if len(blocks) == 0 {
+		return nil, twirp.NotFoundError(fmt.Sprintf("could not find '%s'", req.Address))
+	}
+
+	var respBlocks []*pb.Block
+
+	for _, b := range blocks {
+		respBlocks = append(respBlocks, &pb.Block{
+			Hash: b.Hash,
+			Height: b.Height,
+			ProposerAddress: b.ProposerAddress,
+			Time: timestamppb.New(b.Time),
+			Txs: b.TXs,
+			NumTxs: int64(b.NumTXs),
+		})
+	}
+
+	return &pb.GetBlocksByProposerResponse{
+		Blocks: respBlocks,
+	}, nil
 }

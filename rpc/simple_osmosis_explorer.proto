@@ -2,15 +2,15 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-package github.com.seungjulee.simple_indexer_osmosis.rpc;
+package rpc;
 option go_package = "/rpc";
 
 
 service SimpleOsmosisExplorer {
-  rpc GetBlocksByValidator(GetBlocksByValidatorRequest) returns (GetBlocksByValidatorResponse);
+  rpc GetBlocksByProposer(GetBlocksByProposerRequest) returns (GetBlocksByProposerResponse);
 }
 
-message GetBlocksByValidatorRequest {
+message GetBlocksByProposerRequest {
   string address = 1;
 }
 
@@ -21,9 +21,9 @@ message Block {
   string proposer_address = 4;
   google.protobuf.Timestamp time = 5;
   string txs = 6;
-  string num_txs = 7;
+  int64 num_txs = 7;
 }
 
-message GetBlocksByValidatorResponse {
+message GetBlocksByProposerResponse {
   repeated Block blocks  = 1;
 }

@@ -1,8 +1,6 @@
 package datastore
 
 import (
-	"fmt"
-
 	"github.com/seungjulee/simple-indexer-osmosis/pkg/datastore/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -54,11 +52,21 @@ func (s *sqliteDB) SaveBlock(blk *model.Block) error {
 }
 
 func (s *sqliteDB) GetBlockByHeight(height int64) (*model.Block, error) {
-	fmt.Println(height)
 	var block model.Block
 	if err := s.db.First(&block, "height = ?", height).Error; err != nil {
 		// fmt.Println(err)
 		return nil, err
 	}
 	return &block, nil
+}
+
+func (s *sqliteDB) GetBlocksByProposer(address string) ([]model.Block, error) {
+	// Get all records
+	var blocks []model.Block
+
+	if err := s.db.Where("proposer_address = ?", address).Find(&blocks).Error; err != nil {
+		return nil, err
+	}
+
+	return blocks, nil
 }

@@ -7,6 +7,8 @@ import (
 type Datastore interface {
 	SaveBlock(blk *model.Block) error
 	GetBlockByHeight(height int64) (*model.Block, error)
+
+	GetBlocksByProposer(address string) ([]model.Block, error)
 }
 
 

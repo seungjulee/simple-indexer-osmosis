@@ -42,12 +42,42 @@ func (s *Server) GetBlocksByProposer(ctx context.Context, req *pb.GetBlocksByPro
 			Height: b.Height,
 			ProposerAddress: b.ProposerAddress,
 			Time: timestamppb.New(b.Time),
-			Txs: b.TXs,
+			// Txs: b.TXs,
 			NumTxs: int64(b.NumTXs),
 		})
 	}
 
 	return &pb.GetBlocksByProposerResponse{
+		Blocks: respBlocks,
+	}, nil
+}
+
+func (s *Server) GetNumberOfTXsInLastNBlocks(ctx context.Context, req *pb.GetNumberOfTXsInLastNBlocksRequest) (*pb.GetNumberOfTXsInLastNBlocksResponse, error) {
+	if req.N == 0 {
+		return nil, twirp.RequiredArgumentError("n")
+	}
+
+	blocks, err := s.Datastore.GetNumberOfTXsInLastNBlocks(int(req.N))
+	if err != nil {
+		return nil, twirp.InternalError(err.Error())
+	}
+
+	var totalNumTxs int64
+	var respBlocks []*pb.Block
+	for _, b := range blocks {
+		totalNumTxs += int64(b.NumTXs)
+		respBlocks = append(respBlocks, &pb.Block{
+			Hash: b.Hash,
+			Height: b.Height,
+			ProposerAddress: b.ProposerAddress,
+			Time: timestamppb.New(b.Time),
+			// Txs: b.TXs,
+			NumTxs: int64(b.NumTXs),
+		})
+	}
+
+	return &pb.GetNumberOfTXsInLastNBlocksResponse{
+		TotalNumTxs: totalNumTxs,
 		Blocks: respBlocks,
 	}, nil
 }

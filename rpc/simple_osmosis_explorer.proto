@@ -8,6 +8,7 @@ option go_package = "/rpc";
 
 service SimpleOsmosisExplorer {
   rpc GetBlocksByProposer(GetBlocksByProposerRequest) returns (GetBlocksByProposerResponse);
+  rpc GetNumberOfTXsInLastNBlocks(GetNumberOfTXsInLastNBlocksRequest) returns (GetNumberOfTXsInLastNBlocksResponse);
 }
 
 message GetBlocksByProposerRequest {
@@ -26,4 +27,13 @@ message Block {
 
 message GetBlocksByProposerResponse {
   repeated Block blocks  = 1;
+}
+
+message GetNumberOfTXsInLastNBlocksRequest {
+  int64 n  = 1;
+}
+
+message GetNumberOfTXsInLastNBlocksResponse {
+  int64 total_num_txs = 1;
+  repeated Block blocks  = 2;
 }

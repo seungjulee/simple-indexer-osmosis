@@ -61,10 +61,19 @@ func (s *sqliteDB) GetBlockByHeight(height int64) (*model.Block, error) {
 }
 
 func (s *sqliteDB) GetBlocksByProposer(address string) ([]model.Block, error) {
-	// Get all records
 	var blocks []model.Block
 
 	if err := s.db.Where("proposer_address = ?", address).Find(&blocks).Error; err != nil {
+		return nil, err
+	}
+
+	return blocks, nil
+}
+
+func (s *sqliteDB) GetNumberOfTXsInLastNBlocks(n int) ([]model.Block, error) {
+	var blocks []model.Block
+
+	if err := s.db.Order("height desc").Limit(n).Find(&blocks).Error; err != nil {
 		return nil, err
 	}
 

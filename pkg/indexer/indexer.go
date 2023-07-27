@@ -2,7 +2,6 @@ package indexer
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	// rpc "github.com/tendermint/tendermint/rpc/client"
@@ -66,9 +65,6 @@ func (a *indexer) IndexLatestBlock(ctx context.Context) error {
 		return err
 	}
 
-	netInfo, err := a.client.NetInfo(ctx)
-	fmt.Println(netInfo.NPeers)
-
 	if err := a.db.SaveBlock(&model.Block{
 		BlockID: blk.BlockID.String(),
 		Hash: blk.BlockID.Hash.String(),
@@ -82,11 +78,14 @@ func (a *indexer) IndexLatestBlock(ctx context.Context) error {
 		return err
 	}
 
-	res, err := a.db.GetBlockByHeight(blk.Block.Header.Height)
-	if err != nil {
-		return err
-	}
-	fmt.Println(res)
+	// netInfo, err := a.client.NetInfo(ctx)
+	// fmt.Println(netInfo.NPeers)
+
+	// res, err := a.db.GetBlockByHeight(blk.Block.Header.Height)
+	// if err != nil {
+	// 	return err
+	// }
+	// fmt.Println(res)
 
 	// query := "tm.event = 'Tx' AND tx.height = 3"
 	// txs, err := a.wsClient.Subscribe(ctx, "test-client", query)

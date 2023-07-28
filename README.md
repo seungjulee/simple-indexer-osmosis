@@ -70,5 +70,11 @@ curl --request "POST" \
 ```
 
 ```sh
+ curl --request "POST" \
+    --header "Content-Type: application/json" \
+    --data '{"n_peer": 3, "n_block": 3}' \
+    http://localhost:8080/twirp/rpc.SimpleOsmosisExplorer/GetTopNPeersByScoreInLastNBlocks
 
+
+{"top_n_peers_by_block_height":{"10730901":{"peers":[{"block_height":"10730901", "remote_ip":"135.181.138.95", "default_node_id":"3918d0e114ce819644e966141a5f5229d4248da8", "score":"100"}, {"block_height":"10730901", "remote_ip":"128.0.51.4", "default_node_id":"94a5f37693ba36617029a47d654460d161678af6", "score":"100"}, {"block_height":"10730901", "remote_ip":"65.108.201.138", "default_node_id":"8e1cf1149a5c16ad1733db8921581be99ddb7602", "score":"100"}]}, "10730902":{"peers":[{"block_height":"10730902", "remote_ip":"15.204.52.75", "default_node_id":"7f36123a395e902deaecf63bdaf5656bbb209623", "score":"93"}, {"block_height":"10730902", "remote_ip":"142.132.248.253", "default_node_id":"08ceabce6dadc0aa5d33dc2058b9eeeff6186116", "score":"92"}, {"block_height":"10730902", "remote_ip":"78.46.69.29", "default_node_id":"b69e57cd6f796ac5d6efb1a834163365c37cbfa8", "score":"88"}]}, "10730903":{"peers":[{"block_height":"10730903", "remote_ip":"35.213.129.89", "default_node_id":"834d65bab50dc073c61fa111b418799e51a88fc7", "score":"92"}, {"block_height":"10730903", "remote_ip":"202.182.125.232", "default_node_id":"ed49ce10d8787011c03883846f5cccfcf184e3dc", "score":"91"}, {"block_height":"10730903", "remote_ip":"74.118.140.23", "default_node_id":"82e224c9640048a6513c589e904c0d903bb99f32", "score":"90"}]}}}%
 ```

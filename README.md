@@ -1,11 +1,38 @@
-Prerequisite
+# Overview
+
+## Architecture
+
+## Demo
+
+## Prerequisite
 1. sqlite
 2. twirp
 3. protobuf
 
-Installation
+## Installation
 
 
+## Running it locally
+
+
+## TODO
+### Infra
+1. Use Websocket to subscribe to new blocks and transactions
+2. If any block height is missing, fetch and index the missing block
+
+### Feature
+1. Separate out the schema for transaction. Include more properties
+2. Better scoring system for net info. Look into https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0007-scoring-system-and-network-security/0007-scoring-system-and-network-security.md https://github.com/bro-n-bro/bro_rating/blob/main/README.md
+
+## Development
+
+### Indexer
+
+### RPC / API Server
+
+### Database
+
+## Example Query
 ```sh
 curl --request "POST" \
 --header "Content-Type: application/json" \

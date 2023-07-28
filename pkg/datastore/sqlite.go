@@ -1,6 +1,8 @@
 package datastore
 
 import (
+	"errors"
+
 	"github.com/seungjulee/simple-indexer-osmosis/pkg/datastore/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -18,25 +20,8 @@ func NewSqllite(cfg *SqliteConfig) (Datastore, error) {
 
 	// Migrate the schema
 	db.AutoMigrate(&model.Block{})
-
-	// // Create
-	// db.Create(&Product{Code: "D42", Price: 100})
-
-	// // Read
-	// var product Product
-	// // db.First(&product, 1) // find product with integer primary key
-	// tx := db.First(&product, "code = ?", "D42") // find product with code D42
-	// tx.Commit();
-
-	// fmt.Println(product)
-	// // Update - update product's price to 200
-	// db.Model(&product).Update("Price", 200)
-	// // Update - update multiple fields
-	// db.Model(&product).Updates(Product{Price: 200, Code: "F42"}) // non-zero fields
-	// db.Model(&product).Updates(map[string]interface{}{"Price": 200, "Code": "F42"})
-
-	// // Delete - delete product
-	// db.Delete(&product, 1)
+	db.AutoMigrate(&model.NetInfo{})
+	db.AutoMigrate(&model.Peer{})
 
 	return &sqliteDB{
 		db: db,
@@ -49,6 +34,18 @@ type sqliteDB struct {
 
 func (s *sqliteDB) SaveBlock(blk *model.Block) error {
 	return s.db.Create(blk).Error
+}
+
+func (s *sqliteDB) SaveNetInfoAndPeer(netinfo *model.NetInfo, peers []model.Peer) error {
+	if err := s.db.Create(netinfo).Error; err != nil {
+		return err
+	}
+
+	if err := s.db.CreateInBatches(peers, len(peers)).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *sqliteDB) GetBlockByHeight(height int64) (*model.Block, error) {
@@ -78,4 +75,31 @@ func (s *sqliteDB) GetNumberOfTXsInLastNBlocks(n int) ([]model.Block, error) {
 	}
 
 	return blocks, nil
+}
+
+func (s *sqliteDB) GetTopNPeersByScoreInLastNBlocks(nPeers, nBlocks int) (*PeersByBlockHeight, error) {
+	var blocks []model.Block
+
+	// TOdO: optimize the query to only output number of last
+	if err := s.db.Order("height desc").Limit(nBlocks).Find(&blocks).Error; err != nil {
+		return nil, err
+	}
+	if len(blocks) == 0 {
+		return nil, errors.New("there is no recent block")
+	}
+
+	var peersByHeight map[int][]model.Peer
+	peersByHeight = make(map[int][]model.Peer)
+	for _, b := range blocks {
+		peersByHeight[int(b.Height)] = []model.Peer{}
+		var peers []model.Peer
+		if err := s.db.Order("score desc").Limit(nPeers).Where("block_height = ?", b.Height).Find(&peers).Error; err != nil {
+			return nil, err
+		}
+		peersByHeight[int(b.Height)] = peers
+	}
+
+	return &PeersByBlockHeight{
+		PeersByBlockHeight: peersByHeight,
+	}, nil
 }

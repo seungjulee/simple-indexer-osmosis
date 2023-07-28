@@ -7,8 +7,12 @@ option go_package = "/rpc";
 
 
 service SimpleOsmosisExplorer {
+  // Get which blocks validator X has proposed
   rpc GetBlocksByProposer(GetBlocksByProposerRequest) returns (GetBlocksByProposerResponse);
+  // Get how many transactions were made in the last N blocks
   rpc GetNumberOfTXsInLastNBlocks(GetNumberOfTXsInLastNBlocksRequest) returns (GetNumberOfTXsInLastNBlocksResponse);
+  // Get top N peers based on score over the last N blocks
+  rpc GetTopNPeersByScoreInLastNBlocks(GetTopNPeersByScoreInLastNBlocksRequest) returns (GetTopNPeersByScoreInLastNBlocksResponse);
 }
 
 message GetBlocksByProposerRequest {
@@ -30,10 +34,29 @@ message GetBlocksByProposerResponse {
 }
 
 message GetNumberOfTXsInLastNBlocksRequest {
-  int64 n  = 1;
+  int64 n = 1;
 }
 
 message GetNumberOfTXsInLastNBlocksResponse {
   int64 total_num_txs = 1;
-  repeated Block blocks  = 2;
+  repeated Block blocks = 2;
+}
+
+message GetTopNPeersByScoreInLastNBlocksRequest {
+  int64 n_peer = 1;
+  int64 n_block = 2;
+}
+
+message Peer {
+  int64 block_height = 1;
+  string remote_ip = 2;
+  string default_node_id = 3;
+  int64 score = 4;
+}
+
+message Peers {
+  repeated Peer peers = 1;
+}
+message GetTopNPeersByScoreInLastNBlocksResponse {
+  map<int64, Peers> top_n_peers_by_block_height = 2;
 }

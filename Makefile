@@ -25,3 +25,9 @@ run_example_get_number_of_txs_in_last_n_blocks:
     --data '{"n": 4}' \
     http://localhost:8080/twirp/rpc.SimpleOsmosisExplorer/GetNumberOfTXsInLastNBlocks
 
+run_example_get_top_n_peers_by_score_in_last_n_blocks:
+	curl --request "POST" \
+    --header "Content-Type: application/json" \
+    --data '{"n_peer": 3, "n_block": 3}' \
+    http://localhost:8080/twirp/rpc.SimpleOsmosisExplorer/GetTopNPeersByScoreInLastNBlocks
+

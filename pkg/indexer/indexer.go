@@ -2,11 +2,13 @@ package indexer
 
 import (
 	"context"
+	"math/rand"
 	"time"
 
 	// rpc "github.com/tendermint/tendermint/rpc/client"
 	// ctypes "github.com/tendermint/tendermint/rpc/coretypes"
 	// jsonrpcclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
+
 	"github.com/seungjulee/simple-indexer-osmosis/pkg/datastore"
 	"github.com/seungjulee/simple-indexer-osmosis/pkg/datastore/model"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
@@ -25,23 +27,6 @@ type indexer struct {
 
 
 func New(client *rpchttp.HTTP, db datastore.Datastore) Indexer {
-
-	// wsClient, err := jsonrpcclient.NewWS(config.RPCEndpoint, "/gateway/cos4/rpc/b3fbc22883fc3fe61254616b40fc568b")
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// c, err := jsonrpcclient.DefaultHTTPClient(config.RPCEndpoint)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// //
-	// wsOption := rpcHttp.DefaultWSOptions()
-	// wsOption.Path = "/gateway/cos4/rpc/b3fbc22883fc3fe61254616b40fc568b"
-	// wsClient, err := rpcHttp.NewWithClientAndWSOptions(config.RPCEndpoint, c, wsOption)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	return &indexer{
 		client: client,
 		db: db,
@@ -78,40 +63,35 @@ func (a *indexer) IndexLatestBlock(ctx context.Context) error {
 		return err
 	}
 
-	// netInfo, err := a.client.NetInfo(ctx)
-	// fmt.Println(netInfo.NPeers)
+	netInfo, err := a.client.NetInfo(ctx)
 
-	// res, err := a.db.GetBlockByHeight(blk.Block.Header.Height)
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println(res)
+	niModel := &model.NetInfo{
+		NPeer: netInfo.NPeers,
+		BlockHeight: int(blk.Block.Header.Height),
+	}
 
-	// query := "tm.event = 'Tx' AND tx.height = 3"
-	// txs, err := a.wsClient.Subscribe(ctx, "test-client", query)
-	// if err != nil {
-	// 	return err
-	// }
+	var peerModels []model.Peer
+	for _, peer := range netInfo.Peers {
+		peerModels = append(peerModels, model.Peer{
+			BlockHeight: int(blk.Block.Header.Height),
+			RemoteIP: peer.RemoteIP,
+			DefaultNodeID: string(peer.NodeInfo.DefaultNodeID),
+			Score: getPeerScore(),
+		})
+	}
 
-	// go func() {
-	// for e := range txs {
-	// fmt.Println("got ", e.Data.(types.EventDataTx))
-	// }
-	// }()
-
-	// fmt.Println("!sub")
-	// blockChannel, err := a.wsClient.Subscribe(ctx, "tm.event = 'NewBlock'")
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println("!sub2")
-
-
-	// txChannel, err := a.wsClient.Subscribe(ctx, "tm.event = 'Tx'")
-	// if err != nil {
-	// 	return err
-	// }
+	if err := a.db.SaveNetInfoAndPeer(niModel, peerModels); err != nil {
+		return err
+	}
 
 	return nil
 }
 
+
+// TODO: derive an algorithm to get the peer score
+func getPeerScore() int{
+    rand.Seed(time.Now().UnixNano())
+    min := 0
+    max := 100
+    return rand.Intn(max - min + 1) + min
+}

@@ -81,3 +81,39 @@ func (s *Server) GetNumberOfTXsInLastNBlocks(ctx context.Context, req *pb.GetNum
 		Blocks: respBlocks,
 	}, nil
 }
+
+func (s *Server) GetTopNPeersByScoreInLastNBlocks(ctx context.Context, req *pb.GetTopNPeersByScoreInLastNBlocksRequest) (*pb.GetTopNPeersByScoreInLastNBlocksResponse, error) {
+	if req.NBlock == 0 {
+		return nil, twirp.RequiredArgumentError("n_block")
+	}
+
+	if req.NPeer == 0 {
+		return nil, twirp.RequiredArgumentError("n_peer")
+	}
+
+	peersByBlock, err := s.Datastore.GetTopNPeersByScoreInLastNBlocks(int(req.NPeer), int(req.NBlock))
+	if err != nil {
+		return nil, twirp.InternalError(err.Error())
+	}
+
+	var peersByHeight map[int64]*pb.Peers
+	peersByHeight = make(map[int64]*pb.Peers)
+	for k, v := range peersByBlock.PeersByBlockHeight {
+		peersByHeight[int64(k)] = &pb.Peers{
+			Peers: []*pb.Peer{},
+		}
+
+		for _, p := range v {
+			peersByHeight[int64(k)].Peers = append(peersByHeight[int64(k)].Peers, &pb.Peer{
+				BlockHeight: int64(k),
+				RemoteIp: p.RemoteIP,
+				DefaultNodeId: p.DefaultNodeID,
+				Score: int64(p.Score),
+			})
+		}
+	}
+
+	return &pb.GetTopNPeersByScoreInLastNBlocksResponse{
+		TopNPeersByBlockHeight: peersByHeight,
+	}, nil
+}

@@ -44,7 +44,8 @@ For more Info, please visit https://twitchtv.github.io/twirp/
 ### Infra
 1. Use Websocket to subscribe to new blocks and transactions
 2. If any block height is missing, fetch and index the missing block
-3. Load config instead of hard-coded config
+3. Add a way to backfill the data
+4. Load config instead of hard-coded config
 
 ### Feature
 1. Separate out the schema for transaction. Include more properties

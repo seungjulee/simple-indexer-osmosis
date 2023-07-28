@@ -2,6 +2,7 @@ package indexer
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 
 	"github.com/seungjulee/simple-indexer-osmosis/pkg/datastore"
 	"github.com/seungjulee/simple-indexer-osmosis/pkg/datastore/model"
+	"github.com/seungjulee/simple-indexer-osmosis/pkg/logger"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 )
 
@@ -34,6 +36,8 @@ func New(client *rpchttp.HTTP, db datastore.Datastore) Indexer {
 }
 
 func (a *indexer) SchedulePeriodicIndex(interval time.Duration) error {
+	logger.Info(fmt.Sprintf("Schedule periodic index every %s", interval))
+
 	blockTicker := time.NewTicker(interval)
 	ctx := context.Background()
 	for {
